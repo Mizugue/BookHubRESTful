@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
                         error.getDefaultMessage()).collect(Collectors.joining(", "));
         CategoryError.setMessage(errorMessage);
         CategoryError.setTimeStamp(System.currentTimeMillis());
-        return new ResponseEntity<>(CategoryError, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(CategoryError, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -33,8 +33,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(APIException.class)
     public ResponseEntity<APIErrorResponse> myAPIException(APIException apiException){
         return new ResponseEntity<APIErrorResponse>
-                (new APIErrorResponse(apiException.getMessage(), false), HttpStatus.BAD_REQUEST);
+                (new APIErrorResponse(apiException.getMessage(), false), HttpStatus.OK);
     }
+
 
 
 

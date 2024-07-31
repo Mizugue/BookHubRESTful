@@ -12,6 +12,8 @@ public interface BookService {
     BookDTO createBook(BookDTO book);
     String deleteBook(Long id);
     BookDTO updateBook(BookDTO book, Long id);
-
+    BookResponse searchBookByCategory(Long categoryId);
+    BookResponse searchBookByKeyword(String keyword);
+    BookDTO searchBookByIsbn(String isbn);
 
 }

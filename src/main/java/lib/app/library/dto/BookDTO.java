@@ -1,6 +1,5 @@
 package lib.app.library.dto;
 
-import jakarta.persistence.*;
 import lib.app.library.model.Author;
 import lib.app.library.model.Category;
 import lib.app.library.model.Publisher;

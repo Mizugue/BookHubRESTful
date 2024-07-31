@@ -2,9 +2,12 @@ package lib.app.library.service;
 
 import lib.app.library.dto.BookDTO;
 import lib.app.library.dto.BookResponse;
+import lib.app.library.exception.APIException;
 import lib.app.library.exception.ResourceNotFoundException;
 import lib.app.library.model.Book;
+import lib.app.library.model.Category;
 import lib.app.library.repository.BookRepository;
+import lib.app.library.repository.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,11 +21,16 @@ import java.util.List;
 @Service
 public class BookServiceImpl implements BookService {
 
-    @Autowired
-    private BookRepository bookRepository;
+    private final ModelMapper modelMapper;
+    private final BookRepository bookRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    private ModelMapper modelMapper;
+    public BookServiceImpl(CategoryRepository categoryRepository, BookRepository bookRepository, ModelMapper modelMapper) {
+        this.bookRepository = bookRepository;
+        this.modelMapper = modelMapper;
+        this.categoryRepository = categoryRepository;
+    }
 
     @Override
     public BookResponse findAllBooks(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -72,15 +80,42 @@ public class BookServiceImpl implements BookService {
     public BookDTO updateBook(BookDTO bookDTO, Long id) {
         Book savedBook = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("book"));
-        Book book = modelMapper.map(bookDTO, Book.class);
-        savedBook.setAuthors(book.getAuthors());
-        savedBook.setDescription(book.getDescription());
-        savedBook.setName(book.getName());
-        savedBook.setIsbn(book.getIsbn());
-        savedBook.setCategories(book.getCategories());
-        savedBook.setPublishers(book.getPublishers());
-        Book saved = bookRepository.save(savedBook);
-        return modelMapper.map(saved, BookDTO.class);
-
+        modelMapper.map(bookDTO, savedBook);
+        Book updatedBook = bookRepository.save(savedBook);
+        return modelMapper.map(updatedBook, BookDTO.class);
     }
+
+    @Override
+    public BookResponse searchBookByCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("category"));
+        List<Book> books = bookRepository.findByCategories(category);
+        List<BookDTO> bookDTOS = books.stream().map(book -> modelMapper.map(book, BookDTO.class)).toList();
+        if (bookDTOS.isEmpty()){
+            throw new APIException("Void category");
+        }
+        BookResponse bookResponse = new BookResponse();
+        bookResponse.setContent(bookDTOS);
+        return bookResponse;
+    }
+
+
+    @Override
+    public BookResponse searchBookByKeyword(String keyword) {
+        List<Book> books = bookRepository.findByNameLikeIgnoreCase('%' + keyword + '%');
+        List<BookDTO> bookDTOS = books.stream().map(book -> modelMapper.map(book, BookDTO.class)).toList();
+        BookResponse bookResponse = new BookResponse();
+        bookResponse.setContent(bookDTOS);
+        return bookResponse;
+    }
+
+
+
+    @Override
+    public BookDTO searchBookByIsbn(String isbn) {
+        Book book = bookRepository.findByIsbn(isbn).
+                orElseThrow(() -> new ResourceNotFoundException("book"));
+        return modelMapper.map(book, BookDTO.class);
+    }
+
 }
