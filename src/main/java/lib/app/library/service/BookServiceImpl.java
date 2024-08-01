@@ -2,6 +2,7 @@ package lib.app.library.service;
 
 import lib.app.library.dto.BookDTO;
 import lib.app.library.dto.BookResponse;
+import lib.app.library.dto.CategoryDTO;
 import lib.app.library.exception.APIException;
 import lib.app.library.exception.ResourceNotFoundException;
 import lib.app.library.model.Book;
@@ -72,6 +73,7 @@ public class BookServiceImpl implements BookService {
     public String deleteBook(Long id) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("book"));
+        bookRepository.delete(book);
         return "Book deleted: " + book.getName();
 
     }
