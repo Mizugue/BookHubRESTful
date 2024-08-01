@@ -20,6 +20,7 @@
 - **ModelMapper**: For object-to-object mapping.
 - **Lombok**: Reduces boilerplate code with annotations.
 - **Spring Boot DevTools**: Provides enhanced development experience.
+- **Swagger**: API documentation and testing tool (via Springdoc OpenAPI).
 
 ## Project Setup
 
